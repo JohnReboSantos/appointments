@@ -1,3 +1,4 @@
+// example: convert "2023-06-19T08:00:00Z" to the schedule "monday 8:00 AM-9:00 AM" 
 export const formatISOToSchedule = (schedule: string) => {
   const start = new Date(schedule);
   const end = new Date(start.getTime() + 60 * 60 * 1000);

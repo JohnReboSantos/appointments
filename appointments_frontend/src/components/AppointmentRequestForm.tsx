@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { formatScheduleToISO } from './utils';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../stores/RootStore';
+import { formatISOToSchedule } from './utils';
 import axios from 'axios';
 
 interface ClinicSchedule {
@@ -64,6 +65,13 @@ const AppointmentRequestForm = () => {
     return procedure ? procedure.id : '';
   };
 
+  const getProcedureName = (procedureId: number) => {
+    const procedure = rootStore.procedures.procedures.find(
+      (procedure) => procedure.id === procedureId,
+    );
+    return procedure ? procedure.name : '';
+  };
+
   const sendEmailToDentist = async (appointment: {
     patient_name: string;
     email: string;
@@ -74,7 +82,7 @@ const AppointmentRequestForm = () => {
       .post('http://localhost:5000/send_email', {
         recipient_email: process.env.REACT_APP_DENTIST_EMAIL,
         subject: 'New Appointment Request',
-        message: `A new appointment request has been made. \n ${appointment.patient_name} \n ${appointment.email} \n ${appointment.procedure} \n ${appointment.schedule} \n Please review the details at http://localhost:3000/appointments.`,
+        message: `A new appointment request has been made. \n Name: ${appointment.patient_name} \n Email: ${appointment.email} \n Procedure: ${getProcedureName(appointment.procedure)} \n Schedule: ${formatISOToSchedule(appointment.schedule)} \n Please review the details at http://localhost:3000/appointments.`,
       })
       .then(() => console.log('Email sent to dentist'))
       .catch(() => console.log('Oops email not sent to dentist...'));
@@ -90,7 +98,7 @@ const AppointmentRequestForm = () => {
       .post('http://localhost:5000/send_email', {
         recipient_email: appointment.email,
         subject: 'Appointment Request Confirmation',
-        message: `Thank you for requesting an appointment. \n ${appointment.patient_name} \n ${appointment.email} \n ${appointment.procedure} \n ${appointment.schedule} \n We will review your request and get back to you shortly.`,
+        message: `Thank you for requesting an appointment. \n Name: ${appointment.patient_name} \n Email: ${appointment.email} \n Procedure: ${getProcedureName(appointment.procedure)} \n Schedule: ${formatISOToSchedule(appointment.schedule)} \n We will review your request and get back to you shortly.`,
       })
       .then(() => console.log('Email sent to patient'))
       .catch(() => console.log('Oops email not sent to patient...'));
