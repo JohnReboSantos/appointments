@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from .models import CustomUser
 
+
 class AllowUnauthenticated(permissions.BasePermission):
     def has_permission(self):
         # Allow unauthenticated requests
@@ -19,14 +20,21 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'name', 'email', 'password1', 'password2', 'date_of_birth')
+        fields = (
+            "username",
+            "name",
+            "email",
+            "password1",
+            "password2",
+            "date_of_birth",
+        )
 
     def validate(self, data):
-        name = data.get('name')
-        email = data.get('email')
-        password1 = data.get('password1')
-        password2 = data.get('password2')
-        date_of_birth = data.get('date_of_birth')
+        name = data.get("name")
+        email = data.get("email")
+        password1 = data.get("password1")
+        password2 = data.get("password2")
+        date_of_birth = data.get("date_of_birth")
 
         # Validate if a user with the email already exists
         if CustomUser.objects.filter(email=email).exists():
@@ -48,32 +56,34 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         # Validate date of birth format (YYYY-MM-DD)
         try:
-            birth_date = datetime.strptime(str(date_of_birth), '%Y-%m-%d').date()
+            birth_date = datetime.strptime(str(date_of_birth), "%Y-%m-%d").date()
         except ValueError:
-            raise serializers.ValidationError("Invalid date of birth format. Must be YYYY-MM-DD.")
+            raise serializers.ValidationError(
+                "Invalid date of birth format. Must be YYYY-MM-DD."
+            )
 
         # Validate birth date is in the past
         today = date.today()
         if birth_date > today:
             raise serializers.ValidationError("Birth date must be in the past.")
 
-        data['password'] = password1  # Save the password to the 'password' field
+        data["password"] = password1  # Save the password to the 'password' field
 
         return data
 
     def create(self, validated_data):
-        username = validated_data.get('username')
-        name = validated_data.get('name')
-        email = validated_data.get('email')
-        password = validated_data.get('password')
-        date_of_birth = validated_data.get('date_of_birth')
+        username = validated_data.get("username")
+        name = validated_data.get("name")
+        email = validated_data.get("email")
+        password = validated_data.get("password")
+        date_of_birth = validated_data.get("date_of_birth")
 
         user = CustomUser.objects.create_user(
             username=username,
             email=email,
             password=password,
             name=name,
-            date_of_birth=date_of_birth
+            date_of_birth=date_of_birth,
         )
 
         return user
@@ -84,12 +94,14 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
+        email = attrs.get("email")
+        password = attrs.get("password")
 
-        user = authenticate(request=self.context.get('request'), email=email, password=password)
+        user = authenticate(
+            request=self.context.get("request"), email=email, password=password
+        )
         if not user:
             raise serializers.ValidationError("Invalid email or password.")
 
-        attrs['user'] = user
+        attrs["user"] = user
         return attrs

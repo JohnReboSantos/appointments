@@ -11,20 +11,24 @@ class LoginAPIView(KnoxLoginView):
     def post(self, request, format=None):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
         _, token = AuthToken.objects.create(user)
 
-        return Response({
-            'key': token,
-            'user': {
-                'pk': user.pk,
-                'username': user.username,
-                'first_name': user.name.split()[0],
-                'last_name': ' '.join(user.name.split()[1:]) if len(user.name.split()) > 1 else '',
-                'email': user.email,
-                'date_of_birth': user.date_of_birth
+        return Response(
+            {
+                "key": token,
+                "user": {
+                    "pk": user.pk,
+                    "username": user.username,
+                    "first_name": user.name.split()[0],
+                    "last_name": " ".join(user.name.split()[1:])
+                    if len(user.name.split()) > 1
+                    else "",
+                    "email": user.email,
+                    "date_of_birth": user.date_of_birth,
+                },
             }
-        })
+        )
 
 
 class GetUserDataAPIView(APIView):
@@ -32,15 +36,17 @@ class GetUserDataAPIView(APIView):
         user = request.user
 
         if user.is_authenticated:
-            return Response({
-                'user_info': {
-                    'id': user.id,
-                    'name': user.name,
-                    'email': user.email
-                },
-            })
+            return Response(
+                {
+                    "user_info": {
+                        "id": user.id,
+                        "name": user.name,
+                        "email": user.email,
+                    },
+                }
+            )
 
-        return Response({'error': 'not authenticated'}, status=400)
+        return Response({"error": "not authenticated"}, status=400)
 
 
 class RegisterAPIView(APIView):
@@ -48,38 +54,38 @@ class RegisterAPIView(APIView):
         data = request.data
 
         if isinstance(data, str):  # Handling 'application/x-www-form-urlencoded' format
-            username = request.POST.get('username')
-            name = request.POST.get('name')
-            email = request.POST.get('email')
-            password1 = request.POST.get('password1')
-            password2 = request.POST.get('password2')
-            date_of_birth = request.POST.get('date_of_birth')
+            username = request.POST.get("username")
+            name = request.POST.get("name")
+            email = request.POST.get("email")
+            password1 = request.POST.get("password1")
+            password2 = request.POST.get("password2")
+            date_of_birth = request.POST.get("date_of_birth")
         else:  # Assuming JSON format
-            username = data.get('username')
-            name = data.get('name')
-            email = data.get('email')
-            password1 = data.get('password1')
-            password2 = data.get('password2')
-            date_of_birth = data.get('date_of_birth')
+            username = data.get("username")
+            name = data.get("name")
+            email = data.get("email")
+            password1 = data.get("password1")
+            password2 = data.get("password2")
+            date_of_birth = data.get("date_of_birth")
 
-        serializer = RegisterSerializer(data={
-            'username': username,
-            'name': name,
-            'email': email,
-            'password1': password1,
-            'password2': password2,
-            'date_of_birth': date_of_birth
-        })
+        serializer = RegisterSerializer(
+            data={
+                "username": username,
+                "name": name,
+                "email": email,
+                "password1": password1,
+                "password2": password2,
+                "date_of_birth": date_of_birth,
+            }
+        )
         serializer.is_valid(raise_exception=True)
 
         user = serializer.save()
         _, token = AuthToken.objects.create(user)
 
-        return Response({
-            'user_info': {
-                'id': user.id,
-                'name': user.name,
-                'email': user.email
-            },
-            'token': token
-        })
+        return Response(
+            {
+                "user_info": {"id": user.id, "name": user.name, "email": user.email},
+                "token": token,
+            }
+        )
